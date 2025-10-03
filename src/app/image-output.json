@@ -1,0 +1,49 @@
+{
+  "form_details": {
+    "form_type": [
+      "Admission Form",
+      "Registration Form"
+    ],
+    "academy_name": "COMPLEX ACADEMY",
+    "academy_slogan": "Another way to Education",
+    "academy_type": "EDUCATIONAL & IT TRAINING ACADEMY"
+  },
+  "general_fields": {
+    "date": ""
+  },
+  "personal_information": {
+    "name": "",
+    "last_name": "",
+    "gender": [
+      "Male",
+      "Female"
+    ],
+    "date_of_birth": "",
+    "place_of_birth": "",
+    "father_name": "",
+    "mother_name": "",
+    "nationality": "",
+    "religion": "",
+    "resident_status": [
+      "Resident",
+      "Non-Resident"
+    ],
+    "marital_status": [
+      "Married",
+      "Unmarried"
+    ]
+  },
+  "contact_details": {
+    "present_address": "",
+    "city": "",
+    "state": "",
+    "postal_code": "",
+    "country": "",
+    "phone": "",
+    "email": ""
+  },
+  "signature_fields": {
+    "applicant_signature": "( Applicant Signature Here )",
+    "validated_by": "( Validated By )"
+  }
+}

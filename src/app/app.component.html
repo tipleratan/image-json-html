@@ -1,0 +1,59 @@
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold">PDFMirror</h1>
+    <p class="lead">Upload and duplicate your PDF files with elegance and simplicity.</p>
+  </div>
+
+  <div class="card p-4 shadow-sm">
+    <label for="pdfFile" class="form-label">Choose a PDF file to clone:</label>
+    <input type="file" class="form-control mb-3" id="pdfFile" accept="application/pdf"
+      (change)="onFileSelected($event)">
+
+    <div *ngIf="isMalicious" class="alert alert-danger">
+      Warning: The uploaded PDF contains suspicious or potentially malicious code!
+    </div>
+
+    <label for="codeInput" class="form-label">Insert Code (optional):</label>
+    <textarea class="form-control mb-3" id="codeInput" rows="5" [(ngModel)]="codeText"
+      placeholder="Write your code here..."></textarea>
+    <app-dynamic-form-generator></app-dynamic-form-generator>
+    <button (click)="processPdf()">Process PDF</button>
+    <button class="btn btn-primary w-100" [disabled]="!pdfFile || isMalicious" (click)="clonePdf()">Clone PDF</button>
+  </div>
+
+  <div *ngIf="cloneReady && showDownloadSection" class="text-center mt-4">
+    <p class="text-success">Your cloned PDF is ready!</p>
+
+    <div class="mb-3">
+      <iframe *ngIf="pdfPreviewUrl" [src]="pdfPreviewUrl" width="100%" height="500px"
+        class="border rounded shadow-sm"></iframe>
+    </div>
+    <button class="btn btn-success" (click)="ReadPDF()">Read PDF</button>
+    <button class="btn btn-success" (click)="openRenameModal()">Download Cloned PDF</button>
+  </div>
+</div>
+
+<div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameModalLabel">Rename PDF before downloading</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <label for="filenameInput" class="form-label">Enter file name:</label>
+        <div class="input-group">
+          <input type="text" class="form-control" id="filenameInput" [(ngModel)]="fileName" placeholder="document_name">
+          <span class="input-group-text">.pdf</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="confirmDownload()"
+          data-bs-dismiss="modal">Download</button>
+      </div>
+    </div>
+  </div>
+</div>
