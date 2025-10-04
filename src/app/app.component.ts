@@ -5,13 +5,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { GeminiService } from './services/gemini.service';
 import { DynamicFormGeneratorComponent } from "./dynamic-form/dynamic-form.component";
+import { CodeGeneratorComponent } from "./code-generator/code-generator.component";
 
 declare const bootstrap: any;
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicFormGeneratorComponent],
+  imports: [CommonModule, FormsModule, DynamicFormGeneratorComponent, CodeGeneratorComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

@@ -16,6 +16,7 @@
     <label for="codeInput" class="form-label">Insert Code (optional):</label>
     <textarea class="form-control mb-3" id="codeInput" rows="5" [(ngModel)]="codeText"
       placeholder="Write your code here..."></textarea>
+    <app-code-generator></app-code-generator>
     <app-dynamic-form-generator></app-dynamic-form-generator>
     <button (click)="processPdf()">Process PDF</button>
     <button class="btn btn-primary w-100" [disabled]="!pdfFile || isMalicious" (click)="clonePdf()">Clone PDF</button>

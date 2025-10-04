@@ -1,0 +1,52 @@
+<div class="code-generator-container">
+    <h2>Gemini AI Code Generator (MIT/Angular 19)</h2>
+    <p>
+        Upload a dynamic JSON file and provide a prompt. Gemini will generate
+        HTML, JS, and CSS, which will then be zipped and downloaded.
+    </p>
+
+    <div class="input-group">
+        <label for="json-file">1. Upload Dynamic JSON File:</label>
+        <input type="file" id="json-file" (change)="onFileSelected($event)" accept=".json" required />
+        @if (selectedJsonFile) {
+        <p class="file-status">Selected: <strong>{{ selectedJsonFile.name }}</strong></p>
+        }
+    </div>
+
+    <div class="input-group">
+        <label for="prompt">2. Enter Code Generation Prompt:</label>
+        <textarea id="prompt" rows="4" [(ngModel)]="userPrompt"
+            placeholder="e.g., Generate a simple login form with validation." required></textarea>
+    </div>
+
+    <button (click)="generateAndDownloadCode()" [disabled]="!selectedJsonFile || !userPrompt || isGenerating"
+        class="generate-button">
+        @if (isGenerating) {
+        <span>Generating Code...</span>
+        } @else {
+        <span>3. Generate Code & Download ZIP</span>
+        }
+    </button>
+
+    @if (errorMessage) {
+    <p class="error-message">Error: {{ errorMessage }}</p>
+    }
+
+    @if (generatedCode && !isGenerating) {
+    <div class="success-message">
+        <p>✅ Code Generated Successfully! ZIP file downloaded locally.</p>
+    </div>
+
+    <div class="preview-area">
+        <h3>Code Preview (for reference)</h3>
+        <div class="code-block">
+            <h4>index.html</h4>
+            <pre>{{ generatedCode.html.substring(0, 500) + (generatedCode.html.length > 500 ? '...' : '') }}</pre>
+        </div>
+        <div class="code-block">
+            <h4>script.js</h4>
+            <pre>{{ generatedCode.javascript.substring(0, 500) + (generatedCode.javascript.length > 500 ? '...' : '') }}</pre>
+        </div>
+    </div>
+    }
+</div>
