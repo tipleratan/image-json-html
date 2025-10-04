@@ -1,27 +1,27 @@
 <div class="container py-5">
   <div class="text-center mb-4">
-    <h1 class="display-5 fw-bold">PDFMirror</h1>
-    <p class="lead">Upload and duplicate your PDF files with elegance and simplicity.</p>
+    <h1 class="display-5 fw-bold">Image-Json-Html</h1>
   </div>
 
   <div class="card p-4 shadow-sm">
-    <label for="pdfFile" class="form-label">Choose a PDF file to clone:</label>
-    <input type="file" class="form-control mb-3" id="pdfFile" accept="application/pdf"
+    <label for="pdfFile" class="form-label">Choose Image:</label>
+    <input type="file" class="form-control mb-3" id="pdfFile" accept=".png, .jpg, .jpeg"
       (change)="onFileSelected($event)">
 
     <div *ngIf="isMalicious" class="alert alert-danger">
-      Warning: The uploaded PDF contains suspicious or potentially malicious code!
+      Warning: The uploaded image contains suspicious or potentially malicious code!
     </div>
-
-    <label for="codeInput" class="form-label">Insert Code (optional):</label>
+    <!-- <label for="codeInput" class="form-label">Insert Code (optional):</label>
     <textarea class="form-control mb-3" id="codeInput" rows="5" [(ngModel)]="codeText"
-      placeholder="Write your code here..."></textarea>
-    <app-code-generator></app-code-generator>
-    <app-dynamic-form-generator></app-dynamic-form-generator>
-    <button (click)="processPdf()">Process PDF</button>
-    <button class="btn btn-primary w-100" [disabled]="!pdfFile || isMalicious" (click)="clonePdf()">Clone PDF</button>
-  </div>
+      placeholder="Write your code here..."></textarea> -->
 
+    <!-- <button (click)="processPdf()">Process PDF</button> -->
+    <button class="btn btn-primary w-100" (click)="processPdf()">Process image to json</button>
+  </div>
+  <div class="card p-4 shadow-sm">
+    <app-code-generator></app-code-generator>
+    <!-- <app-dynamic-form-generator></app-dynamic-form-generator> -->
+  </div>
   <div *ngIf="cloneReady && showDownloadSection" class="text-center mt-4">
     <p class="text-success">Your cloned PDF is ready!</p>
 
@@ -29,8 +29,8 @@
       <iframe *ngIf="pdfPreviewUrl" [src]="pdfPreviewUrl" width="100%" height="500px"
         class="border rounded shadow-sm"></iframe>
     </div>
-    <button class="btn btn-success" (click)="ReadPDF()">Read PDF</button>
-    <button class="btn btn-success" (click)="openRenameModal()">Download Cloned PDF</button>
+    <!-- <button class="btn btn-success" (click)="ReadPDF()">Read PDF</button>
+    <button class="btn btn-success" (click)="openRenameModal()">Download Cloned PDF</button> -->
   </div>
 </div>
 
