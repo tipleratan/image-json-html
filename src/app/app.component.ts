@@ -2,16 +2,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { GeminiService } from './services/gemini.service';
 import { CodeGeneratorComponent } from "./code-generator/code-generator.component";
-
+import { finalize } from 'rxjs';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 declare const bootstrap: any;
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, CodeGeneratorComponent],
+  imports: [CommonModule, FormsModule, CodeGeneratorComponent, MatProgressBarModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -24,6 +24,16 @@ export class AppComponent {
   fileName: string = 'cloned-document';
   codeText: string = '';
   isMalicious: boolean = false;
+  // --- New State Variables ---
+  /** True when the PDF is being processed. Controls visibility of the progress bar. */
+  isProcessing: boolean = false;
+  /** The current percentage of progress (0-100). */
+  progress: number = 0;
+  private progressInterval: any; // Used to hold the interval reference for cleanup
+
+  // Assuming you have your service injected
+  // constructor(private geminiService: GeminiService) {} 
+  // ... and other necessary properties like 'pdfFile'
   userInput: string = 'Play a role as document reader having 15 years of experience to read content into PDF attached files.'
     + ' And answer the question base on contents into PDF files.'
     + ' Kindly read every field labels define into PDF files with its values. User can edit its values if he/she wants.';
@@ -36,114 +46,83 @@ export class AppComponent {
       this.pdfFile = input.files[0];
       this.cloneReady = false;
       this.showDownloadSection = false;
-
-      const blobUrl = URL.createObjectURL(this.pdfFile);
-      this.pdfPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
-
-      // Verificar conteúdo malicioso
-      //this.checkForMaliciousCode(this.pdfFile);
     }
   }
 
-  async checkForMaliciousCode(file: File) {
-    const arrayBuffer = await file.arrayBuffer();
-    const text = new TextDecoder().decode(arrayBuffer);
 
-    const maliciousPatterns = /\/JavaScript|\/JS|eval|app\.alert|Launch|Action/i;
+  // --- Progress Simulation Logic (Crucial for UI Feedback) ---
+  /**
+   * Simulates progress when true percentage isn't available from the backend.
+   * NOTE: In a real-world scenario with *true* streaming progress, 
+   * this would be replaced by updates from the backend.
+   */
+  private startProgressSimulation() {
+    // Clear any existing interval just in case
+    this.stopProgressSimulation();
 
-    this.isMalicious = maliciousPatterns.test(text);
+    // Simulate progress every 150ms
+    this.progressInterval = setInterval(() => {
+      // Increment progress but slow down as it gets closer to completion 
+      // (a common UX pattern to manage expectation)
+      if (this.progress < 90) {
+        this.progress += Math.floor(Math.random() * 5) + 1; // Faster at the start
+      } else if (this.progress < 98) {
+        this.progress += 1; // Slower near the end
+      }
+
+      // Cap the progress at 98% to wait for the actual API call to complete
+      if (this.progress >= 98) {
+        this.progress = 98;
+      }
+    }, 150);
   }
 
-  async clonePdf() {
-    if (!this.pdfFile || this.isMalicious) return;
-
-    const arrayBuffer = await this.pdfFile.arrayBuffer();
-    const originalPdf = await PDFDocument.load(arrayBuffer);
-    const newPdf = await PDFDocument.create();
-
-    const pages = await newPdf.copyPages(originalPdf, originalPdf.getPageIndices());
-    pages.forEach((page) => newPdf.addPage(page));
-
-    if (this.codeText.trim()) {
-      const page = newPdf.addPage([600, 800]);
-      const font = await newPdf.embedFont(StandardFonts.Courier);
-      const fontSize = 12;
-      const margin = 20;
-
-      const lines = this.codeText.split('\n');
-      lines.forEach((line, index) => {
-        page.drawText(line, {
-          x: margin,
-          y: page.getHeight() - margin - fontSize * (index + 1),
-          size: fontSize,
-          font,
-        });
-      });
-    }
-
-    this.clonedPdfBytes = await newPdf.save();
-    this.cloneReady = true;
-    this.showDownloadSection = true;
-  }
-
-  openRenameModal() {
-    const modalElement = document.getElementById('renameModal');
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
+  /**
+   * Stops the progress simulation interval.
+   */
+  private stopProgressSimulation() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
     }
   }
 
-  processPdf() {
+
+  // --- Modified processPdf() Function ---
+  processWithProgressBar() {
     if (!this.pdfFile) return;
 
+    // 1. Start the UI processing state and progress simulation
+    this.isProcessing = true;
+    this.progress = 0;
+    this.startProgressSimulation();
+
     const prompt = "Extract all fields and return a JSON object with proper keys.";
+
+    // 2. Call the service and use 'finalize' to handle completion/error
     this.geminiService.generateContentFromImage(prompt, this.pdfFile)
-      .subscribe(result => {
-        console.log('Generated JSON:', result);
+      .pipe(
+        // 'finalize' executes when the Observable completes or errors
+        finalize(() => {
+          this.stopProgressSimulation();
+          // Ensure it shows 100% just before hiding
+          this.progress = 100;
+
+          // Optional: A small delay before hiding for a smooth finish
+          setTimeout(() => {
+            this.isProcessing = false;
+          }, 500);
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          console.log('Generated JSON:', result);
+          // Handle successful result
+        },
+        error: (err) => {
+          console.error('Processing Error:', err);
+          // Handle error (e.g., show error message)
+        }
       });
-  }
-
-  async ReadPDF() {
-
-    const newPdf = await PDFDocument.create();
-    if (!this.pdfFile || this.isMalicious) return;
-    const arrayBuffer = await this.pdfFile.arrayBuffer();
-    const originalPdf = await PDFDocument.load(arrayBuffer);
-    this.geminiService.generateContent(this.userInput).subscribe(res => {
-      this.response = res?.candidates?.[0]?.content?.parts?.[0]?.text + { originalPdf } || 'No response';
-      this.codeText = this.userInput;
-    });
-
-    if (this.codeText.trim()) {
-      const page = newPdf.addPage([600, 800]);
-      const font = await newPdf.embedFont(StandardFonts.Courier);
-      const fontSize = 12;
-      const margin = 20;
-
-      const lines = this.codeText.split('\n');
-      lines.forEach((line, index) => {
-        page.drawText(line, {
-          x: margin,
-          y: page.getHeight() - margin - fontSize * (index + 1),
-          size: fontSize,
-          font,
-        });
-      });
-    }
-
-  }
-
-  confirmDownload() {
-    if (!this.clonedPdfBytes) return;
-
-    const safeFileName = this.fileName.trim() || 'document';
-    const blob = new Blob([this.clonedPdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${safeFileName}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 }

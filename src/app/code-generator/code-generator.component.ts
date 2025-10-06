@@ -5,7 +5,8 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { CodeGeneratorService } from '../services/code-generator.service';
 
-interface GeneratedCode {
+
+export interface GeneratedCode {
     html: string;
     javascript: string;
     css: string;

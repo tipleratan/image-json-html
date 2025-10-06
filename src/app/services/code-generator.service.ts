@@ -59,7 +59,7 @@ export class CodeGeneratorService {
                               3. CSS for styling (inside <css_code> tags).
                     
                 HTML file should follow JSON objects all fields and display on browser using js and css files that created as response
-                when user run locally.
+                when user run locally. Kindly note html file should have link and script tags to connect style.css and script.js files.
           
           User Prompt/Requirement: "${prompt}"
 
